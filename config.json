@@ -1,21 +1,29 @@
 {
   "search_parameters": {
     "job_titles": [
-      "Técnico de Fibra Óptica",
-      "Técnico FTTH",
-      "Técnico de Redes y Telecomunicaciones",
-      "Instalador de Redes",
-      "Técnico Data Center",
-      "Técnico Instalador de Videovigilancia",
-      "Técnico de Sistemas de Seguridad y CCTV"
+      "Tecnico FTTH",
+      "Instalador FTTH",
+      "Tecnico CCTV",
+      "Instalador Telecomunicaciones",
+      "Tecnico de Redes y Cableado",
+      "Fusionador Fibra Optica",
+      "Montador Redes Telecomunicaciones"
     ],
-    "location": "Spain",
-    "results_wanted": 20
+    "locations": [
+      "Alicante",
+      "Valencia",
+      "Benidorm",
+      "Elche",
+      "Madrid",
+      "Barcelona"
+    ],
+    "results_wanted": 10
   },
+  "matching_threshold": 70,
   "candidate_profile": {
-    "experience": "Більше 15 років у телекомунікаціях (Україна та Іспанія). Досвід у монтажі FTTH, зварюванні волоконно-оптичних кабелів (fusión de fibra), прокладанні UTP/FTP, вимірюваннях OTDR, монтажі та обслуговуванні шаф/раків у Data Centers, а також встановленні та налаштуванні систем відеоспостереження та безпеки (CCTV / Videovigilancia).",
-    "languages": "Іспанська (С1 / професійний рівень), Українська (рідна), Англійська (A2).",
-    "work_permit": "Є дозвіл на роботу в Іспанії (Permiso de trabajo)."
-  },
-  "matching_threshold": 70
+    "name": "Candidato Telecomunicaciones",
+    "experience": "Монтаж та розгортання мереж FTTH, зварювання оптоволоконного кабелю (fusion splicing), монтаж та налаштування систем відеоспостереження (CCTV), структуровані кабельні системи (UTP/FTP), тестування та сертифікація трас.",
+    "languages": "Українська (рідна), Іспанська (робочий рівень), Англійська (базовий/технічний)",
+    "work_permit": "Дозвіл на роботу в Іспанії та Євросоюзі наявний, чисті документи, посвідчення водія категорії B."
+  }
 }
