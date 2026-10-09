@@ -1,29 +1,28 @@
 {
   "search_parameters": {
-    "job_titles": [
-      "Tecnico FTTH",
-      "Instalador FTTH",
-      "Tecnico CCTV",
-      "Instalador Telecomunicaciones",
-      "Tecnico de Redes y Cableado",
-      "Fusionador Fibra Optica",
-      "Montador Redes Telecomunicaciones"
-    ],
     "locations": [
-      "Alicante",
-      "Valencia",
-      "Benidorm",
-      "Elche",
-      "Madrid",
-      "Barcelona"
+      "Spain"
     ],
-    "results_wanted": 10
+    "job_titles": [
+      "Instalador FTTH",
+      "Celador fibra optica",
+      "Fusionador fibra optica",
+      "Técnico de telecomunicaciones",
+      "Instalador CCTV",
+      "Instalador FTTH InfoJobs",
+      "Fibra optica Adecco",
+      "Telecomunicaciones Randstad",
+      "FTTH Elecnor",
+      "Técnico Dominion",
+      "Instalador Grupo Cobra"
+    ],
+    "results_wanted": 20
   },
   "matching_threshold": 70,
   "candidate_profile": {
-    "name": "Candidato Telecomunicaciones",
-    "experience": "Монтаж та розгортання мереж FTTH, зварювання оптоволоконного кабелю (fusion splicing), монтаж та налаштування систем відеоспостереження (CCTV), структуровані кабельні системи (UTP/FTP), тестування та сертифікація трас.",
-    "languages": "Українська (рідна), Іспанська (робочий рівень), Англійська (базовий/технічний)",
-    "work_permit": "Дозвіл на роботу в Іспанії та Євросоюзі наявний, чисті документи, посвідчення водія категорії B."
+    "name": "Кандидат",
+    "experience": "Увесь робочий досвід включає роботу в телекомунікаціях, як в Україні, так і в Іспанії. Технічна експертиза в оптоволоконних мережах, зварюванні оптоволокна (fusion splicing), структурованих кабельних системах та монтажі мереж.",
+    "languages": "Українська, Російська, Іспанська (рівень С1), Англійська (рівень В1)",
+    "work_permit": "Так, є дозвіл на роботу в Іспанії"
   }
 }
