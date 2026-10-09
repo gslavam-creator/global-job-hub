@@ -1,0 +1,21 @@
+{
+  "search_parameters": {
+    "job_titles": [
+      "Técnico de Fibra Óptica",
+      "Técnico FTTH",
+      "Técnico de Redes y Telecomunicaciones",
+      "Instalador de Redes",
+      "Técnico de videovigilancia",
+      "Técnico de sistemas de seguridad",s
+      "Técnico Data Center"
+    ],
+    "location": "Spain",
+    "results_wanted": 20
+  },
+  "candidate_profile": {
+    "experience": "Досвід у телекомунікаціях (Україна та Іспанія). Досвід у монтажі FTTH, зварюванні волоконно-оптичних кабелів (fusión de fibra óptica), прокладанні UTP/FTP кабелю, вимірюваннях OTDR/рефлектометрії, монтажі та обслуговуванні шаф/раків у Data Centers.",
+    "languages": "Іспанська (B2 / професійне володіння), Українська (рідна), Англійська (A2).",
+    "work_permit": "Є дозвіл на роботу в Іспанії (Permiso de trabajo)."
+  },
+  "matching_threshold": 70
+}
