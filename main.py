@@ -1,21 +1,23 @@
 import os
 import json
+import html
 import sqlite3
 import requests
+import pandas as pd
 from jobspy import scrape_jobs
 from openai import OpenAI
 
-# 1. Завантаження конфігурації
 CONFIG_FILE = "config.json"
 DB_FILE = "jobs.db"
 
+# 1. Завантаження конфігурації
 def load_config():
     if not os.path.exists(CONFIG_FILE):
         raise FileNotFoundError(f"Файл {CONFIG_FILE} не знайдено!")
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
-# 2. Ініціалізація бази даних для дублікатів
+# 2. Робота з базою даних (Захист від дублікатів)
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -42,18 +44,31 @@ def mark_job_seen(job_id):
     conn.commit()
     conn.close()
 
-# 3. Відправка повідомлень у Telegram
+# 3. Безпечна відправка сповіщень у Telegram
 def send_telegram_notification(bot_token, chat_id, title, company, location, url, score, reason, cover_letter):
+    # Екрануємо спеціальні символи HTML (<, >, &, ")
+    safe_title = html.escape(str(title if title else "Без назви"))
+    safe_company = html.escape(str(company if company else "Не вказано"))
+    safe_location = html.escape(str(location if location else "Spain"))
+    safe_reason = html.escape(str(reason if reason else ""))
+    safe_cover_letter = html.escape(str(cover_letter if cover_letter else ""))
+
+    clean_url = str(url).strip() if url else ""
+    if clean_url.startswith("http://") or clean_url.startswith("https://"):
+        link_html = f"🔗 <a href=\"{clean_url}\">Переглянути та відгукнутися</a>"
+    else:
+        link_html = "🔗 Посилання відсутнє"
+
     text = (
         f"🎯 <b>Нова вакансія ({score}% відповідності)</b>\n\n"
-        f"<b>Посада:</b> {title}\n"
-        f"<b>Компанія:</b> {company}\n"
-        f"<b>Локація:</b> {location}\n\n"
-        f"💡 <b>Оцінка штучного інтелекту:</b>\n{reason}\n\n"
-        f"✉️ <b>Carta de presentación:</b>\n<i>{cover_letter}</i>\n\n"
-        f"🔗 <a href='{url}'>Переглянути та відгукнутися</a>"
+        f"<b>Посада:</b> {safe_title}\n"
+        f"<b>Компанія:</b> {safe_company}\n"
+        f"<b>Локація:</b> {safe_location}\n\n"
+        f"💡 <b>Оцінка штучного інтелекту:</b>\n{safe_reason}\n\n"
+        f"✉️ <b>Carta de presentación:</b>\n<i>{safe_cover_letter}</i>\n\n"
+        f"{link_html}"
     )
-    
+
     api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {
         "chat_id": chat_id,
@@ -61,14 +76,15 @@ def send_telegram_notification(bot_token, chat_id, title, company, location, url
         "parse_mode": "HTML",
         "disable_web_page_preview": False
     }
-    
+
     try:
         res = requests.post(api_url, json=payload, timeout=10)
-        res.raise_for_status()
+        if not res.ok:
+            print(f"⚠️ Помилка Telegram ({res.status_code}): {res.text}", flush=True)
     except Exception as e:
         print(f"⚠️ Помилка відправки в Telegram: {e}", flush=True)
 
-# 4. Оцінка вакансії через GPT-4o-mini
+# 4. Оцінка вакансії через OpenAI
 def evaluate_job(client, job_title, company, description, candidate_profile):
     prompt = f"""
     Ви — професійний IT/Telecom рекрутер в Іспанії.
@@ -82,7 +98,7 @@ def evaluate_job(client, job_title, company, description, candidate_profile):
     Вакансія:
     - Посада: {job_title}
     - Компанія: {company}
-    - Опис: {description[:3000]}
+    - Опис: {str(description)[:2500]}
 
     Поверніть відповідь строго у формі JSON із 3 полями:
     {{
@@ -102,32 +118,31 @@ def evaluate_job(client, job_title, company, description, candidate_profile):
             temperature=0.3
         )
         data = json.loads(response.choices[0].message.content)
-        return data.get("score", 0), data.get("reason", ""), data.get("cover_letter", "")
+        return int(data.get("score", 0)), str(data.get("reason", "")), str(data.get("cover_letter", ""))
     except Exception as e:
-        print(f"⚠️ Помилка OpenAI: {e}", flush=True)
-        return 0, "Помилка аналізу OpenAI", ""
+        print(f"⚠️ Помилка OpenAI API: {e}", flush=True)
+        return 0, "Помилка аналізу через OpenAI", ""
 
-# 5. Головна функція
+# 5. Головний алгоритм
 def main():
     print("🚀 Запуск моніторингу вакансій в Іспанії...", flush=True)
-    
-    # Перевірка секретів
+
     openai_key = os.getenv("OPENAI_API_KEY")
     telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
     telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    
+
     if not all([openai_key, telegram_token, telegram_chat_id]):
         print("❌ Помилка: Не всі секретні ключі додані в GitHub Secrets!", flush=True)
         return
 
     config = load_config()
     init_db()
-    
+
     client = OpenAI(api_key=openai_key)
     search_params = config["search_parameters"]
     threshold = config.get("matching_threshold", 70)
 
-    # Збір вакансій через JobSpy
+    # Збір вакансій
     all_jobs = []
     for title in search_params["job_titles"]:
         print(f"🔎 Шукаємо: '{title}'...", flush=True)
@@ -139,20 +154,18 @@ def main():
                 results_wanted=search_params.get("results_wanted", 10),
                 country_indeed='spain'
             )
-            if not jobs.empty:
+            if jobs is not None and not jobs.empty:
                 all_jobs.append(jobs)
         except Exception as e:
             print(f"⚠️ Помилка скрапінгу для '{title}': {e}", flush=True)
 
     if not all_jobs:
-        print("ℹ️ Нових вакансій на сатах не знайдено.", flush=True)
+        print("ℹ️ Вакансій на сайтах не знайдено.", flush=True)
         return
 
-    import pandas as pd
     combined_jobs = pd.concat(all_jobs, ignore_index=True).drop_duplicates(subset=['id'])
     print(f"\n📊 Всього знайдено унікальних вакансій: {len(combined_jobs)}\n", flush=True)
 
-    # Аналіз кожної вакансії
     matched_count = 0
     for idx, row in combined_jobs.iterrows():
         job_id = str(row.get('id', ''))
@@ -172,7 +185,6 @@ def main():
             client, title, company, description, config["candidate_profile"]
         )
 
-        # ВИВІД У КОНСОЛЬ В РЕАЛЬНОМУ ЧАСІ:
         print(f"🔍 [{score}%] {title} в '{company}' -> {reason}", flush=True)
 
         if score >= threshold:
@@ -184,7 +196,7 @@ def main():
             )
             matched_count += 1
 
-    print(f"\n✅ Запуск завершено. Відправлено вакансій у Telegram: {matched_count}", flush=True)
+    print(f"\n✅ Запуск завершено. Нових підхожих вакансій у Telegram: {matched_count}", flush=True)
 
 if __name__ == "__main__":
     main()
