@@ -1,0 +1,36 @@
+name: Job Search Agent Runner
+
+on:
+  schedule:
+    # Запуск щодня о 12:00 за іспанським часом (09:00 або 10:00 UTC залежно від переходу на зимовий час, зараз це 10:00 UTC)
+    - cron: '0 10 * * *'
+  workflow_dispatch: # Дозволяє запускати скрипт вручну кнопкою
+
+jobs:
+  run-job-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run main script
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+        SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+        BACKUP_EMAIL: ${{ secrets.BACKUP_EMAIL }}
+      run: |
+        python main.py
