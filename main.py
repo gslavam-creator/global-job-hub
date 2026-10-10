@@ -51,6 +51,7 @@ def mark_job_seen(job_id):
 def send_email_application(target_email, subject, body_text, pdf_path):
     sender_email = os.getenv("SENDER_EMAIL")
     sender_password = os.getenv("SENDER_PASSWORD")
+    backup_email = os.getenv("BACKUP_EMAIL")
 
     if not sender_email or not sender_password:
         print("ℹ️ Налаштування SENDER_EMAIL/SENDER_PASSWORD відсутні. Пропускаємо відправку поштою.", flush=True)
@@ -62,6 +63,12 @@ def send_email_application(target_email, subject, body_text, pdf_path):
         msg['To'] = target_email
         msg['Subject'] = subject
 
+        # Формуємо список отримувачів (основа + прихована копія для вас)
+        recipients = [target_email]
+        if backup_email:
+            msg['Bcc'] = backup_email
+            recipients.append(backup_email)
+
         msg.attach(MIMEText(body_text, 'plain', 'utf-8'))
 
         if os.path.exists(pdf_path):
@@ -70,17 +77,20 @@ def send_email_application(target_email, subject, body_text, pdf_path):
                 part['Content-Disposition'] = f'attachment; filename="{os.path.basename(pdf_path)}"'
                 msg.attach(part)
 
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
-        server.quit()
-        print(f"📧 Лист із резюме успішно відправлено на {target_email}!", flush=True)
+        # Підключення через iCloud SMTP (порт 587 + StartTLS)
+        with smtplib.SMTP('smtp.mail.me.com', 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, recipients, msg.as_string())
+
+        print(f"📧 Лист із резюме успішно відправлено на {target_email} (BCC: {backup_email})!", flush=True)
         return True
     except Exception as e:
         print(f"⚠️ Помилка відправки Email на {target_email}: {e}", flush=True)
         return False
 
-def send_telegram_notification(bot_token, chat_id, title, company, location, url, score, reason, cover_letter, site_source="", email_sent=False):
+def send_telegram_notification(bot_token, chat_id, title, company, location, url, score, reason, cover_letter, site_source="", email_sent=False, hr_email=None):
     safe_title = html.escape(str(title if title else "Без назви"))
     safe_company = html.escape(str(company if company else "Не вказано"))
     safe_location = html.escape(str(location if location else "Spain"))
@@ -94,7 +104,10 @@ def send_telegram_notification(bot_token, chat_id, title, company, location, url
     else:
         link_html = "🔗 Посилання відсутнє"
 
-    status_tag = "📩 <b>АВТО-ВІДГУК НАДІСЛАНО НА EMAIL HR!</b>\n\n" if email_sent else ""
+    if email_sent and hr_email:
+        status_tag = f"📩 <b>АВТО-ВІДГУК НАДІСЛАНО НА:</b> <code>{hr_email}</code>\n\n"
+    else:
+        status_tag = ""
 
     text = (
         f"{status_tag}"
@@ -188,7 +201,6 @@ def main():
 
     target_sites = ["linkedin", "indeed", "glassdoor", "zip_recruiter", "google"]
 
-    # Зчитуємо список міст або беремо країну за замовчуванням
     locations = search_params.get("locations", [search_params.get("location", "Spain")])
     job_titles = search_params["job_titles"]
 
@@ -238,7 +250,7 @@ def main():
         print(f"🔍 [{score}%] [{site_source}] {title} в '{company}' -> {reason}", flush=True)
 
         if score >= threshold:
-            print(f"   👉 Відповідність >= {threshold}%! Відправляємо у Telegram...", flush=True)
+            print(f"    👉 Відповідність >= {threshold}%! Відправляємо у Telegram...", flush=True)
 
             email_sent = False
             if hr_email and str(hr_email).strip() and "@" in str(hr_email):
@@ -249,7 +261,7 @@ def main():
                 telegram_token, telegram_chat_id,
                 title, company, location, job_url,
                 score, reason, cover_letter,
-                site_source=site_source, email_sent=email_sent
+                site_source=site_source, email_sent=email_sent, hr_email=hr_email
             )
             matched_count += 1
 
