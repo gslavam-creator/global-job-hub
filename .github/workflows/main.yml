@@ -1,9 +1,9 @@
 name: Run Job Search Agent
 
 on:
-  schedule:
+  #schedule:
     # Запуск рівно о 11:00 за іспанським часом (09:00 UTC) щодня
-    - cron: '0 9 * * *'
+    #- cron: '0 9 * * *'
   workflow_dispatch:
 
 jobs:
