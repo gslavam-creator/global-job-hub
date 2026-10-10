@@ -88,37 +88,7 @@ def send_email_application(target_email, subject, body_text, pdf_path):
         print(f"⚠️ Помилка відправки Email на {target_email}: {e}", flush=True)
         return False
 
-def send_telegram_notification(bot_token, chat_id, title, company, location, url, score, reason, cover_letter, site_source="", email_sent=False, hr_email=None):
-    safe_title = html.escape(str(title if title else "Без назви"))
-    safe_company = html.escape(str(company if company else "Не вказано"))
-    safe_location = html.escape(str(location if location else "Spain"))
-    safe_reason = html.escape(str(reason if reason else ""))
-    safe_cover_letter = html.escape(str(cover_letter if cover_letter else ""))
-    safe_site = html.escape(str(site_source if site_source else "Веб-сайт"))
-
-    clean_url = str(url).strip() if url else ""
-    if clean_url.startswith("http://") or clean_url.startswith("https://"):
-        link_html = f"🔗 <a href=\"{clean_url}\">Переглянути вакансію та відгукнутися</a>"
-    else:
-        link_html = "🔗 Посилання відсутнє"
-
-    if email_sent and hr_email:
-        status_tag = f"📩 <b>АВТО-ВІДГУК НАДІСЛАНО НА:</b> <code>{hr_email}</code>\n\n"
-    else:
-        status_tag = ""
-
-    text = (
-        f"{status_tag}"
-        f"🎯 <b>Нова вакансія ({score}% відповідності)</b>\n\n"
-        f"<b>Посада:</b> {safe_title}\n"
-        f"<b>Компанія:</b> {safe_company}\n"
-        f"<b>Локація:</b> {safe_location}\n"
-        f"<b>Джерело:</b> {safe_site}\n\n"
-        f"💡 <b>Аналіз штучного інтелекту:</b>\n{safe_reason}\n\n"
-        f"✉️ <b>Carta de presentación:</b>\n<i>{safe_cover_letter}</i>\n\n"
-        f"{link_html}"
-    )
-
+def send_telegram_message(bot_token, chat_id, text):
     api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {
         "chat_id": chat_id,
@@ -126,14 +96,10 @@ def send_telegram_notification(bot_token, chat_id, title, company, location, url
         "parse_mode": "HTML",
         "disable_web_page_preview": False
     }
-
     try:
         res = requests.post(api_url, json=payload, timeout=10)
         if not res.ok:
             print(f"⚠️ Помилка Telegram ({res.status_code}): {res.text}", flush=True)
-            
-        # Більше НЕ відправляємо файл резюме в Telegram (блок вилучено)
-
     except Exception as e:
         print(f"⚠️ Помилка відправки в Telegram: {e}", flush=True)
 
@@ -177,7 +143,7 @@ def evaluate_job(client, job_title, company, description, candidate_profile):
         return 0, "Помилка аналізу через OpenAI", "", None
 
 def main():
-    print("🚀 Запуск розширеного моніторингу вакансій в Іспанії...", flush=True)
+    print("🚀 Запуск агента моніторингу вакансій в Іспанії...", flush=True)
 
     openai_key = os.getenv("OPENAI_API_KEY")
     telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -217,13 +183,22 @@ def main():
                 print(f"⚠️ Помилка скрапінгу для '{title}' у '{location}': {e}", flush=True)
 
     if not all_jobs:
-        print("ℹ️ Вакансій на сайтах не знайдено.", flush=True)
+        print("ℹ️ Вакансій на сайтах не знайдено взагалі.", flush=True)
+        send_telegram_message(
+            telegram_token, telegram_chat_id,
+            "📊 <b>Щоденний звіт агента</b>\n\n"
+            "ℹ️ За останню добу нових вакансій за вашими критеріями на порталах не виявлено.\n"
+            "<i>Агент продовжує моніторинг і перевірить знову завтра о 11:00.</i>"
+        )
         return
 
     combined_jobs = pd.concat(all_jobs, ignore_index=True).drop_duplicates(subset=['id'])
-    print(f"\n📊 Всього знайдено унікальних вакансій: {len(combined_jobs)}\n", flush=True)
+    total_scanned = len(combined_jobs)
+    print(f"\n📊 Всього зібрано унікальних вакансій у скануванні: {total_scanned}\n", flush=True)
 
-    matched_count = 0
+    new_matched_count = 0
+    emails_sent_count = 0
+
     for idx, row in combined_jobs.iterrows():
         job_id = str(row.get('id', ''))
         title = str(row.get('title', 'Без назви'))
@@ -233,34 +208,76 @@ def main():
         description = str(row.get('description', 'Немає опису'))
         site_source = str(row.get('site', 'Веб-сайт'))
 
-        if not job_id or is_job_seen(job_id):
+        if not job_id:
             continue
 
+        # Перевірка чи вакансія вже була оброблена раніше
+        if is_job_seen(job_id):
+            continue
+
+        # Позначаємо вакансію як опрацьовану в базі даних
         mark_job_seen(job_id)
 
+        # Аналіз через OpenAI
         score, reason, cover_letter, hr_email = evaluate_job(
             client, title, company, description, config["candidate_profile"]
         )
 
-        print(f"🔍 [{score}%] [{site_source}] {title} в '{company}' -> {reason}", flush=True)
+        print(f"🔍 [Нова] [{score}%] [{site_source}] {title} в '{company}' -> {reason}", flush=True)
 
         if score >= threshold:
-            print(f"    👉 Відповідність >= {threshold}%! Відправляємо у Telegram...", flush=True)
-
+            new_matched_count += 1
             email_sent = False
+            
             if hr_email and str(hr_email).strip() and "@" in str(hr_email):
                 subject = f"Candidatura: {title} - {config['candidate_profile'].get('name', 'Candidato')}"
                 email_sent = send_email_application(hr_email, subject, cover_letter, CV_FILE)
+                if email_sent:
+                    emails_sent_count += 1
 
-            send_telegram_notification(
-                telegram_token, telegram_chat_id,
-                title, company, location, job_url,
-                score, reason, cover_letter,
-                site_source=site_source, email_sent=email_sent, hr_email=hr_email
+            # Формування повідомлення для Telegram
+            safe_title = html.escape(title)
+            safe_company = html.escape(company)
+            safe_location = html.escape(location)
+            safe_reason = html.escape(reason)
+            safe_cover_letter = html.escape(cover_letter)
+            safe_site = html.escape(site_source)
+
+            clean_url = str(url).strip() if url else ""
+            if job_url.startswith("http://") or job_url.startswith("https://"):
+                link_html = f"🔗 <a href=\"{job_url}\">Переглянути вакансію та відгукнутися самостійно</a>"
+            else:
+                link_html = "🔗 Посилання відсутнє"
+
+            if email_sent and hr_email:
+                status_tag = f"📩 <b>АВТО-ВІДГУК НАДІСЛАНО НА ПОШТУ:</b> <code>{hr_email}</code>\n\n"
+            else:
+                status_tag = "⚠️ <b>Прямий мейл відсутній.</b> Відгукуйтеся за посиланням нижче:\n\n"
+
+            text = (
+                f"{status_tag}"
+                f"🎯 <b>Нова вакансія ({score}% відповідності)</b>\n\n"
+                f"<b>Посада:</b> {safe_title}\n"
+                f"<b>Компанія:</b> {safe_company}\n"
+                f"<b>Локація:</b> {safe_location}\n"
+                f"<b>Джерело:</b> {safe_site}\n\n"
+                f"💡 <b>Аналіз ШІ:</b>\n{safe_reason}\n\n"
+                f"✉️ <b>Carta de presentación:</b>\n<i>{safe_cover_letter}</i>\n\n"
+                f"{link_html}"
             )
-            matched_count += 1
+            send_telegram_message(telegram_token, telegram_chat_id, text)
 
-    print(f"\n✅ Запуск завершено. Оброблено нових вакансій: {matched_count}", flush=True)
+    # Підсумковий щоденний звіт (надсилається завжди після завершення циклу)
+    summary_text = (
+        f"📊 <b>Щоденний звіт агента з працевлаштування</b>\n\n"
+        f"🔍 Проскановано унікальних вакансій: <b>{total_scanned}</b>\n"
+        f"✨ Нових підходящих вакансій (≥ {threshold}%): <b>{new_matched_count}</b>\n"
+        f"📩 Автоматично надіслано резюме на пошту: <b>{emails_sent_count}</b>\n\n"
+        f"<i>Агент виконав планову перевірку. Наступний запуск — завтра о 11:00.</i>"
+    )
+    send_telegram_message(telegram_token, telegram_chat_id, summary_text)
+
+    print(f"\n✅ Запуск завершено. Нових підходящих вакансій опрацьовано: {new_matched_count}", flush=True)
 
 if __name__ == "__main__":
     main()
