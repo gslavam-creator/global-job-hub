@@ -63,7 +63,6 @@ def send_email_application(target_email, subject, body_text, pdf_path):
         msg['To'] = target_email
         msg['Subject'] = subject
 
-        # Формуємо список отримувачів (основа + прихована копія для вас)
         recipients = [target_email]
         if backup_email:
             msg['Bcc'] = backup_email
@@ -77,7 +76,6 @@ def send_email_application(target_email, subject, body_text, pdf_path):
                 part['Content-Disposition'] = f'attachment; filename="{os.path.basename(pdf_path)}"'
                 msg.attach(part)
 
-        # Підключення через iCloud SMTP (порт 587 + StartTLS)
         with smtplib.SMTP('smtp.mail.me.com', 587) as server:
             server.ehlo()
             server.starttls()
@@ -133,11 +131,8 @@ def send_telegram_notification(bot_token, chat_id, title, company, location, url
         res = requests.post(api_url, json=payload, timeout=10)
         if not res.ok:
             print(f"⚠️ Помилка Telegram ({res.status_code}): {res.text}", flush=True)
-
-        if os.path.exists(CV_FILE):
-            doc_url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
-            with open(CV_FILE, 'rb') as doc:
-                requests.post(doc_url, data={'chat_id': chat_id, 'caption': f'📄 Ваше резюме для вакансії: {title}'}, files={'document': doc}, timeout=15)
+            
+        # Більше НЕ відправляємо файл резюме в Telegram (блок вилучено)
 
     except Exception as e:
         print(f"⚠️ Помилка відправки в Telegram: {e}", flush=True)
