@@ -188,7 +188,7 @@ def main():
             telegram_token, telegram_chat_id,
             "📊 <b>Щоденний звіт агента</b>\n\n"
             "ℹ️ За останню добу нових вакансій за вашими критеріями на порталах не виявлено.\n"
-            "<i>Агент продовжує моніторинг і перевірить знову завтра о 11:00.</i>"
+            "<i>Агент продовжує моніторинг і перевірить знову завтра о 12:00.</i>"
         )
         return
 
@@ -243,9 +243,9 @@ def main():
             safe_cover_letter = html.escape(cover_letter)
             safe_site = html.escape(site_source)
 
-            clean_url = str(url).strip() if url else ""
-            if job_url.startswith("http://") or job_url.startswith("https://"):
-                link_html = f"🔗 <a href=\"{job_url}\">Переглянути вакансію та відгукнутися самостійно</a>"
+            clean_url = str(job_url).strip() if job_url else ""
+            if clean_url.startswith("http://") or clean_url.startswith("https://"):
+                link_html = f"🔗 <a href=\"{clean_url}\">Переглянути вакансію та відгукнутися самостійно</a>"
             else:
                 link_html = "🔗 Посилання відсутнє"
 
@@ -273,7 +273,7 @@ def main():
         f"🔍 Проскановано унікальних вакансій: <b>{total_scanned}</b>\n"
         f"✨ Нових підходящих вакансій (≥ {threshold}%): <b>{new_matched_count}</b>\n"
         f"📩 Автоматично надіслано резюме на пошту: <b>{emails_sent_count}</b>\n\n"
-        f"<i>Агент виконав планову перевірку. Наступний запуск — завтра о 11:00.</i>"
+        f"<i>Агент виконав планову перевірку. Наступний запуск — завтра о 12:00.</i>"
     )
     send_telegram_message(telegram_token, telegram_chat_id, summary_text)
 
