@@ -6,6 +6,86 @@ from cv_generator import generate_pdf_cv
 
 DB_FILE = "database.db"
 
+st.markdown("""
+<style>
+    /* 1. Глобальна колірна палітра: глибокий темно-блакитний SaaS-стиль (#0f172a) */
+    .stApp {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+    }
+
+    /* 2. Поля введення (м'які рамки, темні фони для комфортного заповнення тексту) */
+    .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
+        background-color: #1e293b !important;
+        color: #f8fafc !important;
+        border: 1px solid #334155 !important;
+        border-radius: 10px !important;
+        padding: 0.6rem 0.8rem !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    .stTextInput input:focus, .stTextArea textarea:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+        background-color: #1e293b !important;
+    }
+
+    .stTextInput label, .stTextArea label, .stSelectbox label {
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* 3. Кнопки (градієнти, м'які тіні та плавний hover-ефект) */
+    .stButton>button {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        padding: 0.65rem 1.4rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5) !important;
+        transform: translateY(-2px) !important;
+    }
+
+    /* 4. Вкладки (Tabs) як акуратні інтерактивні плашки */
+    div.stTabs [data-baseweb="tab-list"] {
+        gap: 8px !important;
+        background-color: #1e293b !important;
+        padding: 6px !important;
+        border-radius: 12px !important;
+        border: 1px solid #334155 !important;
+    }
+
+    div.stTabs [data-baseweb="tab"] {
+        background-color: transparent !important;
+        border-radius: 8px !important;
+        padding: 8px 18px !important;
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+        border: none !important;
+        transition: all 0.2s ease !important;
+    }
+
+    div.stTabs [data-baseweb="tab-highlight-bar"] {
+        display: none !important;
+    }
+
+    div.stTabs [aria-selected="true"] {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Словник локалізації (7 мов)
 TRANSLATIONS = {
     "uk": {
