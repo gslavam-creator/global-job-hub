@@ -25,6 +25,7 @@ TRANSLATIONS = {
         "profile_header": "Контакти, профіль та налаштування кандидата",
         "name_label": "Повне ім'я",
         "phone_label": "Номер телефону",
+        "mail_label": "Електронна пошта",
         "address_label": "Адреса (Місто, Країна)",
         "profile_summary_label": "Професійний профіль (Summary)",
         "lang_label": "Мови",
