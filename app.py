@@ -8,7 +8,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 DB_FILE = "database.db"
 
-# Розширений словник локалізації (7 мов)
+# Словник локалізації (7 мов)
 TRANSLATIONS = {
     "uk": {
         "page_title": "Global Job Hub | SaaS",
@@ -217,25 +217,3 @@ TRANSLATIONS = {
         "sidebar_auth": "🔑 Identificação",
         "email_label": "Seu E-mail",
         "email_help": "Chave exclusiva para o seu perfil no sistema.",
-        "sidebar_lang": "🌐 Idioma da Interface",
-        "sidebar_info": "ℹ️ Sobre o Sistema",
-        "sidebar_desc": "Este serviço analisa automaticamente o mercado de trabalho global com base nos seus critérios e envia relatórios pessoais.",
-        "welcome_warning": "👋 Por favor, insira seu **E-mail** na barra lateral à esquerda para começar.",
-        "tab1": "👤 Perfil e Busca",
-        "tab2": "🤖 Alertas do Telegram",
-        "tab3": "⚡ Gestão e CV",
-        "profile_header": "Configurações do Perfil do Candidato",
-        "name_label": "Nome Completo",
-        "permit_label": "Autorização de Trabalho / Visto",
-        "lang_label": "Idiomas",
-        "lang_placeholder": "Inglês Fluente, Espanhol B2",
-        "titles_label": "Cargos Desejados (separados por vírgula)",
-        "locs_label": "Regiões / Cidades / Remoto",
-        "threshold_label": "Limiar de Correspondência de IA (%)",
-        "exp_label": "Experiência Profissional Detalhada e Habilidades",
-        "save_profile_btn": "💾 Salvar Perfil e Atualizar CV",
-        "tg_header": "Configurações do Bot do Telegram",
-        "tg_desc": "Insira os dados do seu bot para receber notificações instantâneas sobre novas vagas.",
-        "tg_token": "Token do Bot do Telegram",
-        "tg_chat": "ID de Chat do Telegram",
-        "save_tg_btn": "
