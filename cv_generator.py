@@ -60,14 +60,11 @@ def generate_pdf_cv(profile, email, pdf_filename):
     if contacts:
         story.append(Paragraph(" | ".join(contacts), meta_style))
         
-    # Логістика / Доступність / Мови (Другий рядок шапки)
+    # Логістика / Мови (Другий рядок шапки)
     logistics = []
     locs = profile.get("locations", "")
     if locs:
         logistics.append(f"<b>Locations/Remote:</b> {locs}")
-    permit = profile.get("work_permit", "")
-    if permit:
-        logistics.append(f"<b>Work Auth:</b> {permit}")
     langs = profile.get("languages", "")
     if langs:
         logistics.append(f"<b>Languages:</b> {langs}")
