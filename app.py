@@ -69,7 +69,7 @@ def generate_pdf_cv(profile, pdf_filename):
 
     story.append(Paragraph(profile.get("name", "Candidate CV"), title_style))
     story.append(Spacer(1, 10))
-    story.append(Paragraph("<b>Дозвіл на роботу:</b> " + profile.get("work_permit", ""), body_style))
+    story.append(Paragraph("<b>Дозвіл на роботу / Віза:</b> " + profile.get("work_permit", ""), body_style))
     story.append(Paragraph("<b>Мови:</b> " + profile.get("languages", ""), body_style))
     story.append(Paragraph("Професійний досвід та навички", heading_style))
     story.append(Paragraph(profile.get("experience", "").replace("\n", "<br/>"), body_style))
@@ -80,22 +80,22 @@ init_db()
 
 # Конфігурація сторінки
 st.set_page_config(
-    page_title="Spain Job Agent | SaaS",
-    page_icon="⚡",
+    page_title="Global Job Hub | SaaS",
+    page_icon="🌍",
     layout="wide"
 )
 
 # Шапка додатка
-st.title("⚡ Spain Job Agent SaaS")
-st.caption("Автономна платформа пошуку вакансій та генерації супровідних документів в Іспанії.")
+st.title("🌍 Global Job Hub")
+st.caption("Автономна платформа глобального пошуку вакансій, генерації резюме та розумних сповіщень.")
 
-# Авторизація у верхній частині або сайдбарі
+# Авторизація у сайдбарі
 with st.sidebar:
     st.markdown("### 🔑 Ідентифікація")
     user_email = st.text_input("Ваш Email", placeholder="candidate@example.com", help="Ключ до вашого профілю у системі.")
     st.divider()
     st.markdown("### ℹ️ Про систему")
-    st.info("Цей сервіс автоматично сканує ринок праці за вашими критеріями та надсилає персональні звіти.")
+    st.info("Цей сервіс автоматично сканує світовий ринок праці за вашими критеріями та надсилає персональні звіти.")
 
 if not user_email or "@" not in user_email:
     st.warning("👋 Будь ласка, введіть свій **Email** у бічній панелі ліворуч, щоб розпочати.")
@@ -105,29 +105,29 @@ else:
     default_name = user_data["name"] if user_data else ""
     default_exp = user_data["experience"] if user_data else ""
     default_lang = user_data["languages"] if user_data else ""
-    default_permit = user_data["work_permit"] if user_data else "Permiso de trabajo en España"
-    default_titles = user_data["job_titles"] if user_data else "Instalador FTTH, Técnico de redes"
-    default_locs = user_data["locations"] if user_data else "Alicante, Valencia, Murcia"
+    default_permit = user_data["work_permit"] if user_data else "Work Authorization / Visa Status"
+    default_titles = user_data["job_titles"] if user_data else "Software Engineer, Telecom Specialist, Remote"
+    default_locs = user_data["locations"] if user_data else "Remote, Europe, USA"
     default_threshold = user_data["matching_threshold"] if user_data else 70
     default_tg_token = user_data["telegram_token"] if user_data else ""
     default_tg_chat = user_data["telegram_chat_id"] if user_data else ""
 
-    # Створюємо сучасні вкладки замість нескінченної прокрутки
+    # Сучасні вкладки
     tab1, tab2, tab3 = st.tabs(["👤 Профіль та Пошук", "🤖 Telegram-сповіщення", "⚡ Керування та CV"])
 
     with tab1:
-        st.markdown("#### Налаштування вашої анкетування")
+        st.markdown("#### Налаштування профілю кандидата")
         with st.form("profile_form"):
             col1, col2 = st.columns(2, gap="large")
             
             with col1:
                 candidate_name = st.text_input("Повне ім'я", value=default_name)
-                work_permit = st.text_input("Дозвіл на роботу", value=default_permit)
-                languages = st.text_input("Мови", value=default_lang)
+                work_permit = st.text_input("Дозвіл на роботу / Віза", value=default_permit)
+                languages = st.text_input("Мови", value=default_lang, placeholder="English (Fluent), Spanish (B2)")
                 
             with col2:
                 job_titles_input = st.text_area("Бажані посади (через кому)", value=default_titles, height=80)
-                locations_input = st.text_input("Міста / Регіони", value=default_locs)
+                locations_input = st.text_input("Регіони / Міста / Remote", value=default_locs)
                 matching_threshold = st.slider("Поріг релевантності ШІ (%)", min_value=50, max_value=95, value=default_threshold)
             
             experience = st.text_area("Детальний досвід роботи та навички", value=default_exp, height=120)
@@ -136,7 +136,7 @@ else:
 
     with tab2:
         st.markdown("#### Налаштування Telegram-бота")
-        st.markdown("Введіть дані вашого бота, щоб отримувати сповіщення про знайдені вакансії.")
+        st.markdown("Введіть дані вашого бота для отримання миттєвих сповіщень про нові вакансії.")
         
         with st.form("telegram_form"):
             telegram_token = st.text_input("Telegram Bot Token", type="password", value=default_tg_token)
@@ -166,9 +166,9 @@ else:
                 st.info("Спочатку збережіть профіль на першій вкладці, щоб згенерувати документ.")
 
         with col_agent:
-            st.markdown("##### 🚀 Запуск сканування ринку")
+            st.markdown("##### 🚀 Запуск глобального сканування")
             if st.button("⚡ Запустити пошук вакансій зараз", use_container_width=True):
-                with st.spinner("Агент виконує аналіз ринку праці..."):
+                with st.spinner("Агент сканує глобальний ринок праці..."):
                     try:
                         result = subprocess.run(["python", "main.py"], capture_output=True, text=True, timeout=120)
                         if result.returncode == 0:
@@ -181,9 +181,8 @@ else:
                     except Exception as e:
                         st.error(f"❌ Не вдалося запустити: {e}")
 
-    # Обробка збереження з форм
+    # Обробка збереження
     if submitted or ('tg_submitted' in locals() and tg_submitted):
-        # Збираємо актуальні дані з полів або сесії
         current_data = get_user_data(user_email) or {}
         
         profile_data = {
