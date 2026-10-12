@@ -8,7 +8,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 DB_FILE = "database.db"
 
-# Словник локалізації (7 мов)
+# Перевірений словник локалізації (7 мов)
 TRANSLATIONS = {
     "uk": {
         "page_title": "Global Job Hub | SaaS",
@@ -217,3 +217,187 @@ TRANSLATIONS = {
         "sidebar_auth": "🔑 Identificação",
         "email_label": "Seu E-mail",
         "email_help": "Chave exclusiva para o seu perfil no sistema.",
+        "sidebar_lang": "🌐 Idioma da Interface",
+        "sidebar_info": "ℹ️ Sobre o Sistema",
+        "sidebar_desc": "Este serviço analisa automaticamente o mercado de trabalho global com base nos seus critérios e envia relatórios pessoais.",
+        "welcome_warning": "👋 Por favor, insira seu **E-mail** na barra lateral à esquerda para começar.",
+        "tab1": "👤 Perfil e Busca",
+        "tab2": "🤖 Alertas do Telegram",
+        "tab3": "⚡ Gestão e CV",
+        "profile_header": "Configurações do Perfil do Candidato",
+        "name_label": "Nome Completo",
+        "permit_label": "Autorização de Trabalho / Visto",
+        "lang_label": "Idiomas",
+        "lang_placeholder": "Inglês Fluente, Espanhol B2",
+        "titles_label": "Cargos Desejados (separados por vírgula)",
+        "locs_label": "Regiões / Cidades / Remoto",
+        "threshold_label": "Limiar de Correspondência de IA (%)",
+        "exp_label": "Experiência Profissional Detalhada e Habilidades",
+        "save_profile_btn": "💾 Salvar Perfil e Atualizar CV",
+        "tg_header": "Configurações do Bot do Telegram",
+        "tg_desc": "Insira os dados do seu bot para receber notificações instantâneas sobre novas vagas.",
+        "tg_token": "Token do Bot do Telegram",
+        "tg_chat": "ID de Chat do Telegram",
+        "save_tg_btn": "💾 Salvar Configurações do Telegram",
+        "docs_header": "Documentos e Execução do Agente",
+        "cv_header": "📄 Seu CV Pessoal",
+        "download_cv": "📥 Baixar CV.pdf",
+        "cv_info": "Salve seu perfil na primeira aba para gerar o documento.",
+        "scan_header": "🚀 Executar Varredura Global",
+        "scan_btn": "⚡ Buscar Empregos Agora",
+        "scan_spinner": "O agente está escaneando o mercado de trabalho global...",
+        "scan_success": "✅ Varredura concluída com sucesso!",
+        "log_exp": "Log de Execução",
+        "save_success": "✨ Alterações salvas com sucesso no banco de dados e CV atualizado!"
+    },
+    "ru": {
+        "page_title": "Global Job Hub | SaaS",
+        "app_title": "🌍 Global Job Hub",
+        "app_caption": "Автономная платформа глобального поиска вакансий, генерации резюме и умных уведомлений.",
+        "sidebar_auth": "🔑 Идентификация",
+        "email_label": "Ваш Email",
+        "email_help": "Уникальный ключ вашего профиля в системе.",
+        "sidebar_lang": "🌐 Язык интерфейса",
+        "sidebar_info": "ℹ️ О системе",
+        "sidebar_desc": "Этот сервис автоматически сканирует мировой рынок труда по вашим критериям и отправляет персональные отчеты.",
+        "welcome_warning": "👋 Пожалуйста, введите свой **Email** в боковой панели слева, чтобы начать.",
+        "tab1": "👤 Профиль и Поиск",
+        "tab2": "🤖 Telegram-уведомления",
+        "tab3": "⚡ Управление и CV",
+        "profile_header": "Настройки профиля кандидата",
+        "name_label": "Полное имя",
+        "permit_label": "Разрешение на работу / Виза",
+        "lang_label": "Языки",
+        "lang_placeholder": "English (Fluent), Spanish (B2)",
+        "titles_label": "Желаемые должности (через запятую)",
+        "locs_label": "Регионы / Города / Remote",
+        "threshold_label": "Порог релевантности ИИ (%)",
+        "exp_label": "Подробный опыт работы и навыки",
+        "save_profile_btn": "💾 Сохранить профиль и обновить CV",
+        "tg_header": "Настройки Telegram-бота",
+        "tg_desc": "Введите данные вашего бота для получения мгновенных уведомлений о новых вакансиях.",
+        "tg_token": "Telegram Bot Token",
+        "tg_chat": "Telegram Chat ID",
+        "save_tg_btn": "💾 Сохранить настройки Telegram",
+        "docs_header": "Работа с документами и запуск агента",
+        "cv_header": "📄 Ваше персональное CV",
+        "download_cv": "📥 Скачать CV.pdf",
+        "cv_info": "Сначала сохраните профиль на первой вкладке, чтобы сгенерировать документ.",
+        "scan_header": "🚀 Запуск глобального сканирования",
+        "scan_btn": "⚡ Запустить поиск вакансий сейчас",
+        "scan_spinner": "Агент сканирует глобальный рынок труда...",
+        "scan_success": "✅ Сканирование успешно завершено!",
+        "log_exp": "Лог выполнения",
+        "save_success": "✨ Изменения успешно сохранены в базе данных и резюме обновлено!"
+    }
+}
+
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            email TEXT PRIMARY KEY,
+            name TEXT,
+            experience TEXT,
+            languages TEXT,
+            work_permit TEXT,
+            job_titles TEXT,
+            locations TEXT,
+            matching_threshold INTEGER,
+            telegram_token TEXT,
+            telegram_chat_id TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def get_user_data(email):
+    if not email:
+        return None
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, experience, languages, work_permit, job_titles, locations, matching_threshold, telegram_token, telegram_chat_id FROM users WHERE email = ?", (email,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "name": row[0], "experience": row[1], "languages": row[2],
+            "work_permit": row[3], "job_titles": row[4], "locations": row[5],
+            "matching_threshold": row[6], "telegram_token": row[7], "telegram_chat_id": row[8]
+        }
+    return None
+
+def save_user_data(email, data):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT OR REPLACE INTO users (email, name, experience, languages, work_permit, job_titles, locations, matching_threshold, telegram_token, telegram_chat_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        email, data["name"], data["experience"], data["languages"], data["work_permit"],
+        data["job_titles"], data["locations"], data["matching_threshold"],
+        data["telegram_token"], data["telegram_chat_id"]
+    ))
+    conn.commit()
+    conn.close()
+
+def generate_pdf_cv(profile, pdf_filename):
+    doc = SimpleDocTemplate(pdf_filename, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+    story = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontSize=20, spaceAfter=15, textColor="#0f172a")
+    heading_style = ParagraphStyle('HeadingStyle', parent=styles['Heading2'], fontSize=14, spaceBefore=10, spaceAfter=6, textColor="#1e293b")
+    body_style = ParagraphStyle('BodyStyle', parent=styles['Normal'], fontSize=11, spaceAfter=8, leading=14)
+
+    story.append(Paragraph(profile.get("name", "Candidate CV"), title_style))
+    story.append(Spacer(1, 10))
+    story.append(Paragraph("<b>Work Authorization / Visa:</b> " + profile.get("work_permit", ""), body_style))
+    story.append(Paragraph("<b>Languages:</b> " + profile.get("languages", ""), body_style))
+    story.append(Paragraph("Professional Experience & Skills", heading_style))
+    story.append(Paragraph(profile.get("experience", "").replace("\n", "<br/>"), body_style))
+    
+    doc.build(story)
+
+init_db()
+
+# Конфігурація сторінки
+st.set_page_config(
+    page_title="Global Job Hub | SaaS",
+    page_icon="🌍",
+    layout="wide"
+)
+
+# Вибір мови у сайдбарі
+with st.sidebar:
+    st.markdown("### 🌐 Language / Мова / Idioma")
+    selected_lang = st.selectbox(
+        "Виберіть мову",
+        options=["uk", "en", "es", "fr", "de", "pt", "ru"],
+        format_func=lambda x: {
+            "uk": "🇺🇦 Українська",
+            "en": "🇬🇧 English",
+            "es": "🇪🇸 Español",
+            "fr": "🇫🇷 Français",
+            "de": "🇩🇪 Deutsch",
+            "pt": "🇵🇹 Português",
+            "ru": "🇷🇺 Русский"
+        }[x],
+        label_visibility="collapsed"
+    )
+    st.session_state["lang"] = selected_lang
+
+# Отримуємо переклади для поточної мови
+lang = st.session_state.get("lang", "uk")
+t = TRANSLATIONS[lang]
+
+# Шапка додатка
+st.title(t["app_title"])
+st.caption(t["app_caption"])
+
+# Авторизація у сайдбарі
+with st.sidebar:
+    st.divider()
+    st.markdown(f"### {t['sidebar_auth']}")
+    user_email = st.text_input(t["email_label"], placeholder="candidate@example.com", help=
