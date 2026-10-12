@@ -6,3 +6,4 @@ streamlit
 reportlab
 pandas
 requests
+reportlab
