@@ -16,7 +16,7 @@ def generate_pdf_cv(profile, email, pdf_filename):
     story = []
     styles = getSampleStyleSheet()
     
-    # Стилі
+    # Стилі для професійного резюме
     title_style = ParagraphStyle(
         'CVTitle', parent=styles['Heading1'], 
         fontSize=20, leading=24, textColor=colors.HexColor("#0f172a"), spaceAfter=2
@@ -39,14 +39,16 @@ def generate_pdf_cv(profile, email, pdf_filename):
         fontSize=10, leading=14.5, textColor=colors.HexColor("#0f172a"), spaceAfter=6
     )
 
-    # 1. Шапка: Ім'я, Посади
-    story.append(Paragraph(profile.get("name", "Candidate CV"), title_style))
+    # 1. Шапка: Ім'я та бажані посади
+    name = profile.get("name", "")
+    if name:
+        story.append(Paragraph(name, title_style))
     
     titles = profile.get("job_titles", "")
     if titles:
         story.append(Paragraph(f"<b>Target Roles:</b> {titles}", subtitle_style))
         
-    # Блок КОНТАКТИ у шапці (Телефон, Email, Адреса)
+    # Блок контакти (Телефон, Email, Адреса)
     contacts = []
     phone = profile.get("phone", "")
     if phone:
@@ -58,9 +60,9 @@ def generate_pdf_cv(profile, email, pdf_filename):
         contacts.append(f"<b>Address:</b> {address}")
         
     if contacts:
-        story.append(Paragraph("<b>Контакти:</b> " + " | ".join(contacts), meta_style))
+        story.append(Paragraph(" | ".join(contacts), meta_style))
         
-    # Логістика / Регіони / Мови
+    # Логістика / регіони / мови
     logistics = []
     locs = profile.get("locations", "")
     if locs:
@@ -102,7 +104,7 @@ def generate_pdf_cv(profile, email, pdf_filename):
         story.append(Paragraph(certs.replace("\n", "<br/>"), body_style))
         story.append(Spacer(1, 4))
 
-    # 6. Інші дані (Дозвіл на роботу, права, авто, переїзд тощо)
+    # 6. Інші дані (Дозвіл на роботу, права, авто, переїзд)
     other = profile.get("other_data", "")
     if other:
         story.append(Paragraph("Other Data & Availability", heading_style))
