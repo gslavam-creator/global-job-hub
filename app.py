@@ -2,9 +2,7 @@ import streamlit as st
 import sqlite3
 import os
 import subprocess
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from cv_generator import generate_pdf_cv
 
 DB_FILE = "database.db"
 
@@ -24,7 +22,7 @@ TRANSLATIONS = {
         "tab1": "👤 Профіль та Пошук",
         "tab2": "🤖 Telegram-сповіщення",
         "tab3": "⚡ Керування та CV",
-        "profile_header": "Налаштування профілю кандидата",
+        "profile_header": "Розширені налаштування профілю кандидата",
         "name_label": "Повне ім'я",
         "permit_label": "Дозвіл на роботу / Віза",
         "lang_label": "Мови",
@@ -32,8 +30,11 @@ TRANSLATIONS = {
         "titles_label": "Бажані посади (через кому)",
         "locs_label": "Регіони / Міста / Remote",
         "threshold_label": "Поріг релевантності ШІ (%)",
-        "exp_label": "Детальний досвід роботи та навички",
-        "save_profile_btn": "💾 Зберегти профіль та оновити CV",
+        "exp_label": "Детальний досвід роботи",
+        "edu_label": "Освіта",
+        "cert_label": "Сертифікати та ліцензії",
+        "add_label": "Додаткова інформація (навички, інструменти, водійське посвідчення тощо)",
+        "save_profile_btn": "💾 Зберегти профіль та оновити професійне CV",
         "tg_header": "Налаштування Telegram-бота",
         "tg_desc": "Введіть дані вашого бота для отримання миттєвих сповіщень про нові вакансії.",
         "tg_token": "Telegram Bot Token",
@@ -48,7 +49,7 @@ TRANSLATIONS = {
         "scan_spinner": "Агент сканує глобальний ринок праці...",
         "scan_success": "✅ Сканування завершено успішно!",
         "log_exp": "Лог виконання",
-        "save_success": "✨ Зміни успішно збережено в базі даних та резюме оновлено!"
+        "save_success": "✨ Зміни успішно збережено в базі даних та розширене резюме оновлено!"
     },
     "en": {
         "page_title": "Global Job Hub | SaaS",
@@ -64,7 +65,7 @@ TRANSLATIONS = {
         "tab1": "👤 Profile & Search",
         "tab2": "🤖 Telegram Alerts",
         "tab3": "⚡ Management & CV",
-        "profile_header": "Candidate Profile Settings",
+        "profile_header": "Advanced Candidate Profile Settings",
         "name_label": "Full Name",
         "permit_label": "Work Authorization / Visa",
         "lang_label": "Languages",
@@ -72,8 +73,11 @@ TRANSLATIONS = {
         "titles_label": "Target Job Titles (comma separated)",
         "locs_label": "Regions / Cities / Remote",
         "threshold_label": "AI Matching Threshold (%)",
-        "exp_label": "Detailed Work Experience & Skills",
-        "save_profile_btn": "💾 Save Profile & Update CV",
+        "exp_label": "Detailed Work Experience",
+        "edu_label": "Education",
+        "cert_label": "Certifications & Licenses",
+        "add_label": "Additional Information (skills, tools, driver's license, etc.)",
+        "save_profile_btn": "💾 Save Profile & Update Professional CV",
         "tg_header": "Telegram Bot Settings",
         "tg_desc": "Enter your bot details to receive instant notifications about new job openings.",
         "tg_token": "Telegram Bot Token",
@@ -88,7 +92,7 @@ TRANSLATIONS = {
         "scan_spinner": "Agent is scanning the global job market...",
         "scan_success": "✅ Scan completed successfully!",
         "log_exp": "Execution Log",
-        "save_success": "✨ Changes successfully saved to database and CV updated!"
+        "save_success": "✨ Changes successfully saved to database and professional CV updated!"
     },
     "es": {
         "page_title": "Global Job Hub | SaaS",
@@ -104,7 +108,7 @@ TRANSLATIONS = {
         "tab1": "👤 Perfil y Búsqueda",
         "tab2": "🤖 Alertas de Telegram",
         "tab3": "⚡ Gestión y CV",
-        "profile_header": "Configuración del Perfil",
+        "profile_header": "Configuración Avanzada del Perfil",
         "name_label": "Nombre Completo",
         "permit_label": "Permiso de Trabajo / Visa",
         "lang_label": "Idiomas",
@@ -112,8 +116,11 @@ TRANSLATIONS = {
         "titles_label": "Puestos Deseados (separados por comas)",
         "locs_label": "Regiones / Ciudades / Remoto",
         "threshold_label": "Umbral de Coincidencia de IA (%)",
-        "exp_label": "Experiencia Laboral Detallada y Habilidades",
-        "save_profile_btn": "💾 Guardar Perfil y Actualizar CV",
+        "exp_label": "Experiencia Laboral Detallada",
+        "edu_label": "Educación",
+        "cert_label": "Certificaciones y Licencias",
+        "add_label": "Información Adicional (habilidades, herramientas, carné de conducir, etc.)",
+        "save_profile_btn": "💾 Guardar Perfil y Actualizar CV Profesional",
         "tg_header": "Configuración del Bot de Telegram",
         "tg_desc": "Introduce los datos de tu bot para recibir notificaciones instantáneas de nuevas ofertas.",
         "tg_token": "Token del Bot de Telegram",
@@ -128,7 +135,7 @@ TRANSLATIONS = {
         "scan_spinner": "El agente está escaneando el mercado laboral global...",
         "scan_success": "✅ ¡Análisis completado con éxito!",
         "log_exp": "Registro de Ejecución",
-        "save_success": "✨ ¡Cambios guardados en la base de datos y CV actualizado!"
+        "save_success": "✨ ¡Cambios guardados en la base de datos y CV profesional actualizado!"
     },
     "fr": {
         "page_title": "Global Job Hub | SaaS",
@@ -144,7 +151,7 @@ TRANSLATIONS = {
         "tab1": "👤 Profil et Recherche",
         "tab2": "🤖 Alertes Telegram",
         "tab3": "⚡ Gestion et CV",
-        "profile_header": "Paramètres du profil candidat",
+        "profile_header": "Paramètres avancés du profil",
         "name_label": "Nom complet",
         "permit_label": "Autorisation de travail / Visa",
         "lang_label": "Langues",
@@ -152,8 +159,11 @@ TRANSLATIONS = {
         "titles_label": "Postes recherchés (séparés par des virgules)",
         "locs_label": "Régions / Villes / Télétravail",
         "threshold_label": "Seuil de correspondance IA (%)",
-        "exp_label": "Expérience professionnelle détaillée et compétences",
-        "save_profile_btn": "💾 Enregistrer le profil et mettre à jour le CV",
+        "exp_label": "Expérience professionnelle détaillée",
+        "edu_label": "Formation",
+        "cert_label": "Certifications & Licences",
+        "add_label": "Informations complémentaires (compétences, outils, permis de conduire, etc.)",
+        "save_profile_btn": "💾 Enregistrer et mettre à jour le CV professionnel",
         "tg_header": "Paramètres du bot Telegram",
         "tg_desc": "Entrez les détails de votre bot pour recevoir des notifications instantanées sur les nouvelles offres.",
         "tg_token": "Jeton du bot Telegram",
@@ -168,7 +178,7 @@ TRANSLATIONS = {
         "scan_spinner": "L'agent analyse le marché mondial de l'emploi...",
         "scan_success": "✅ Analyse terminée avec succès !",
         "log_exp": "Journal d'exécution",
-        "save_success": "✨ Modifications enregistrées dans la base de données et CV mis à jour !"
+        "save_success": "✨ Modifications enregistrées et CV professionnel mis à jour !"
     },
     "de": {
         "page_title": "Global Job Hub | SaaS",
@@ -184,7 +194,7 @@ TRANSLATIONS = {
         "tab1": "👤 Profil & Suche",
         "tab2": "🤖 Telegram-Benachrichtigungen",
         "tab3": "⚡ Verwaltung & Lebenslauf",
-        "profile_header": "Kandidatenprofil-Einstellungen",
+        "profile_header": "Erweiterte Kandidatenprofil-Einstellungen",
         "name_label": "Vollständiger Name",
         "permit_label": "Arbeitserlaubnis / Visum",
         "lang_label": "Sprachen",
@@ -192,8 +202,11 @@ TRANSLATIONS = {
         "titles_label": "Gewünschte Berufsbezeichnungen (durch Komma getrennt)",
         "locs_label": "Regionen / Städte / Remote",
         "threshold_label": "KI-Übereinstimmungsschwellenwert (%)",
-        "exp_label": "Detaillierte Berufserfahrung & Fähigkeiten",
-        "save_profile_btn": "💾 Profil speichern & Lebenslauf aktualisieren",
+        "exp_label": "Detaillierte Berufserfahrung",
+        "edu_label": "Ausbildung",
+        "cert_label": "Zertifikate & Lizenzen",
+        "add_label": "Zusätzliche Informationen (Fähigkeiten, Tools, Führerschein usw.)",
+        "save_profile_btn": "💾 Profil speichern & professionellen Lebenslauf aktualisieren",
         "tg_header": "Telegram-Bot-Einstellungen",
         "tg_desc": "Geben Sie Ihre Bot-Daten ein, um sofortige Benachrichtigungen über neue Stellenangebote zu erhalten.",
         "tg_token": "Telegram Bot Token",
@@ -208,7 +221,7 @@ TRANSLATIONS = {
         "scan_spinner": "Der Agent scannt den globalen Arbeitsmarkt...",
         "scan_success": "✅ Scan erfolgreich abgeschlossen!",
         "log_exp": "Ausführungsprotokoll",
-        "save_success": "✨ Änderungen erfolgreich in der Datenbank gespeichert und Lebenslauf aktualisiert!"
+        "save_success": "✨ Änderungen erfolgreich gespeichert und professioneller Lebenslauf aktualisiert!"
     },
     "pt": {
         "page_title": "Global Job Hub | SaaS",
@@ -224,7 +237,7 @@ TRANSLATIONS = {
         "tab1": "👤 Perfil e Busca",
         "tab2": "🤖 Alertas do Telegram",
         "tab3": "⚡ Gestão e CV",
-        "profile_header": "Configurações do Perfil do Candidato",
+        "profile_header": "Configurações Avançadas do Perfil",
         "name_label": "Nome Completo",
         "permit_label": "Autorização de Trabalho / Visto",
         "lang_label": "Idiomas",
@@ -232,8 +245,11 @@ TRANSLATIONS = {
         "titles_label": "Cargos Desejados (separados por vírgula)",
         "locs_label": "Regiões / Cidades / Remoto",
         "threshold_label": "Limiar de Correspondência de IA (%)",
-        "exp_label": "Experiência Profissional Detalhada e Habilidades",
-        "save_profile_btn": "💾 Salvar Perfil e Atualizar CV",
+        "exp_label": "Experiência Profissional Detalhada",
+        "edu_label": "Educação",
+        "cert_label": "Certificações e Licenças",
+        "add_label": "Informações Adicionais (habilidades, ferramentas, carta de condução, etc.)",
+        "save_profile_btn": "💾 Salvar Perfil e Atualizar CV Profissional",
         "tg_header": "Configurações do Bot do Telegram",
         "tg_desc": "Insira os dados do seu bot para receber notificações instantâneas sobre novas vagas.",
         "tg_token": "Token do Bot do Telegram",
@@ -248,7 +264,7 @@ TRANSLATIONS = {
         "scan_spinner": "O agente está escaneando o mercado de trabalho global...",
         "scan_success": "✅ Varredura concluída com sucesso!",
         "log_exp": "Log de Execução",
-        "save_success": "✨ Alterações salvas com sucesso no banco de dados e CV atualizado!"
+        "save_success": "✨ Alterações salvas com sucesso e CV profissional atualizado!"
     },
     "ru": {
         "page_title": "Global Job Hub | SaaS",
@@ -264,7 +280,7 @@ TRANSLATIONS = {
         "tab1": "👤 Профиль и Поиск",
         "tab2": "🤖 Telegram-уведомления",
         "tab3": "⚡ Управление и CV",
-        "profile_header": "Настройки профиля кандидата",
+        "profile_header": "Расширенные настройки профиля кандидата",
         "name_label": "Полное имя",
         "permit_label": "Разрешение на работу / Виза",
         "lang_label": "Языки",
@@ -272,8 +288,11 @@ TRANSLATIONS = {
         "titles_label": "Желаемые должности (через запятую)",
         "locs_label": "Регионы / Города / Remote",
         "threshold_label": "Порог релевантности ИИ (%)",
-        "exp_label": "Подробный опыт работы и навыки",
-        "save_profile_btn": "💾 Сохранить профиль и обновить CV",
+        "exp_label": "Подробный опыт работы",
+        "edu_label": "Образование",
+        "cert_label": "Сертификаты и лицензии",
+        "add_label": "Дополнительная информация (навыки, инструменты, водительское удостоверение и т.д.)",
+        "save_profile_btn": "💾 Сохранить профиль и обновить профессиональное CV",
         "tg_header": "Настройки Telegram-бота",
         "tg_desc": "Введите данные вашего бота для получения мгновенных уведомлений о новых вакансиях.",
         "tg_token": "Telegram Bot Token",
@@ -288,7 +307,7 @@ TRANSLATIONS = {
         "scan_spinner": "Агент сканирует глобальный рынок труда...",
         "scan_success": "✅ Сканирование успешно завершено!",
         "log_exp": "Лог выполнения",
-        "save_success": "✨ Изменения успешно сохранены в базе данных и резюме обновлено!"
+        "save_success": "✨ Изменения успешно сохранены в базе данных и профессиональное резюме обновлено!"
     }
 }
 
@@ -306,9 +325,17 @@ def init_db():
             locations TEXT,
             matching_threshold INTEGER,
             telegram_token TEXT,
-            telegram_chat_id TEXT
+            telegram_chat_id TEXT,
+            education TEXT,
+            certifications TEXT,
+            additional_info TEXT
         )
     ''')
+    for col in ["education", "certifications", "additional_info"]:
+        try:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
+        except sqlite3.OperationalError:
+            pass
     conn.commit()
     conn.close()
 
@@ -317,14 +344,20 @@ def get_user_data(email):
         return None
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT name, experience, languages, work_permit, job_titles, locations, matching_threshold, telegram_token, telegram_chat_id FROM users WHERE email = ?", (email,))
+    cursor.execute("""
+        SELECT name, experience, languages, work_permit, job_titles, locations, 
+               matching_threshold, telegram_token, telegram_chat_id, 
+               education, certifications, additional_info 
+        FROM users WHERE email = ?
+    """, (email,))
     row = cursor.fetchone()
     conn.close()
     if row:
         return {
             "name": row[0], "experience": row[1], "languages": row[2],
             "work_permit": row[3], "job_titles": row[4], "locations": row[5],
-            "matching_threshold": row[6], "telegram_token": row[7], "telegram_chat_id": row[8]
+            "matching_threshold": row[6], "telegram_token": row[7], "telegram_chat_id": row[8],
+            "education": row[9] or "", "certifications": row[10] or "", "additional_info": row[11] or ""
         }
     return None
 
@@ -332,44 +365,29 @@ def save_user_data(email, data):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT OR REPLACE INTO users (email, name, experience, languages, work_permit, job_titles, locations, matching_threshold, telegram_token, telegram_chat_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO users (
+            email, name, experience, languages, work_permit, job_titles, 
+            locations, matching_threshold, telegram_token, telegram_chat_id, 
+            education, certifications, additional_info
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         email, data["name"], data["experience"], data["languages"], data["work_permit"],
         data["job_titles"], data["locations"], data["matching_threshold"],
-        data["telegram_token"], data["telegram_chat_id"]
+        data["telegram_token"], data["telegram_chat_id"],
+        data["education"], data["certifications"], data["additional_info"]
     ))
     conn.commit()
     conn.close()
 
-def generate_pdf_cv(profile, pdf_filename):
-    doc = SimpleDocTemplate(pdf_filename, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-    story = []
-    styles = getSampleStyleSheet()
-    
-    title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontSize=20, spaceAfter=15, textColor="#0f172a")
-    heading_style = ParagraphStyle('HeadingStyle', parent=styles['Heading2'], fontSize=14, spaceBefore=10, spaceAfter=6, textColor="#1e293b")
-    body_style = ParagraphStyle('BodyStyle', parent=styles['Normal'], fontSize=11, spaceAfter=8, leading=14)
-
-    story.append(Paragraph(profile.get("name", "Candidate CV"), title_style))
-    story.append(Spacer(1, 10))
-    story.append(Paragraph("<b>Work Authorization / Visa:</b> " + profile.get("work_permit", ""), body_style))
-    story.append(Paragraph("<b>Languages:</b> " + profile.get("languages", ""), body_style))
-    story.append(Paragraph("Professional Experience & Skills", heading_style))
-    story.append(Paragraph(profile.get("experience", "").replace("\n", "<br/>"), body_style))
-    
-    doc.build(story)
-
 init_db()
 
-# Конфігурація сторінки
 st.set_page_config(
     page_title="Global Job Hub | SaaS",
     page_icon="🌍",
     layout="wide"
 )
 
-# Вибір мови у сайдбарі (Українська остання)
 with st.sidebar:
     st.markdown("### 🌐 Language")
     selected_lang = st.selectbox(
@@ -388,15 +406,12 @@ with st.sidebar:
     )
     st.session_state["lang"] = selected_lang
 
-# Отримуємо переклади для поточної мови
 lang = st.session_state.get("lang", "en")
 t = TRANSLATIONS[lang]
 
-# Шапка додатка
 st.title(t["app_title"])
 st.caption(t["app_caption"])
 
-# Авторизація у сайдбарі
 with st.sidebar:
     st.divider()
     st.markdown(f"### {t['sidebar_auth']}")
@@ -412,6 +427,9 @@ else:
     
     default_name = user_data["name"] if user_data else ""
     default_exp = user_data["experience"] if user_data else ""
+    default_edu = user_data["education"] if user_data else ""
+    default_certs = user_data["certifications"] if user_data else ""
+    default_add = user_data["additional_info"] if user_data else ""
     default_lang = user_data["languages"] if user_data else ""
     default_permit = user_data["work_permit"] if user_data else "Work Authorization / Visa Status"
     default_titles = user_data["job_titles"] if user_data else "Software Engineer, Telecom Specialist, Remote"
@@ -420,7 +438,6 @@ else:
     default_tg_token = user_data["telegram_token"] if user_data else ""
     default_tg_chat = user_data["telegram_chat_id"] if user_data else ""
 
-    # Вкладки з перекладами
     tab1, tab2, tab3 = st.tabs([t["tab1"], t["tab2"], t["tab3"]])
 
     with tab1:
@@ -439,6 +456,9 @@ else:
                 matching_threshold = st.slider(t["threshold_label"], min_value=50, max_value=95, value=default_threshold)
             
             experience = st.text_area(t["exp_label"], value=default_exp, height=120)
+            education = st.text_area(t["edu_label"], value=default_edu, height=80)
+            certifications = st.text_area(t["cert_label"], value=default_certs, height=80)
+            additional_info = st.text_area(t["add_label"], value=default_add, height=90)
             
             submitted = st.form_submit_button(t["save_profile_btn"], use_container_width=True)
 
@@ -489,13 +509,15 @@ else:
                     except Exception as e:
                         st.error(f"❌ Failed to run: {e}")
 
-    # Обробка збереження форм
     if submitted or ('tg_submitted' in locals() and tg_submitted):
         current_data = get_user_data(user_email) or {}
         
         profile_data = {
             "name": candidate_name if 'candidate_name' in locals() else current_data.get("name", ""),
             "experience": experience if 'experience' in locals() else current_data.get("experience", ""),
+            "education": education if 'education' in locals() else current_data.get("education", ""),
+            "certifications": certifications if 'certifications' in locals() else current_data.get("certifications", ""),
+            "additional_info": additional_info if 'additional_info' in locals() else current_data.get("additional_info", ""),
             "languages": languages if 'languages' in locals() else current_data.get("languages", ""),
             "work_permit": work_permit if 'work_permit' in locals() else current_data.get("work_permit", ""),
             "job_titles": job_titles_input if 'job_titles_input' in locals() else current_data.get("job_titles", ""),
@@ -507,6 +529,6 @@ else:
 
         save_user_data(user_email, profile_data)
         pdf_filename = f"CV_{user_email.replace('@', '_at_').replace('.', '_')}.pdf"
-        generate_pdf_cv(profile_data, pdf_filename)
+        generate_pdf_cv(profile_data, user_email, pdf_filename)
         
         st.success(t["save_success"])
