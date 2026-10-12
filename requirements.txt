@@ -2,3 +2,7 @@ python-jobspy
 openai
 python-telegram-bot
 python-dotenv
+streamlit
+reportlab
+pandas
+requests
