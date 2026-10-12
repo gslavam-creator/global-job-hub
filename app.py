@@ -381,8 +381,8 @@ with st.sidebar:
             "fr": "🇫🇷 Français",
             "de": "🇩🇪 Deutsch",
             "pt": "🇵🇹 Português",
-            "ru": "🇷🇺 Русский"
-            "uk": "🇺🇦 Українська",
+            "ru": "🇷🇺 Русский",
+            "uk": "🇺🇦 Українська"
         }[x],
         label_visibility="collapsed"
     )
