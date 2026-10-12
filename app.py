@@ -13,7 +13,7 @@ TRANSLATIONS = {
     "uk": {
         "page_title": "Global Job Hub | SaaS",
         "app_title": "🌍 Global Job Hub",
-        "app_caption": "Автономна платформа глобального пошуку вакансій, генерації резюме та розумних сповіщень.",
+        "app_caption": "Автономна платформа пошуку вакансій, підрядів і субпідрядів, генерації резюме та комерційних пропозицій.",
         "sidebar_auth": "🔑 Ідентифікація",
         "email_label": "Ваш Email",
         "email_help": "Ключ до вашого профілю у системі.",
@@ -53,7 +53,7 @@ TRANSLATIONS = {
     "en": {
         "page_title": "Global Job Hub | SaaS",
         "app_title": "🌍 Global Job Hub",
-        "app_caption": "Autonomous platform for global job hunting, resume generation, and smart notifications.",
+        "app_caption": "Autonomous platform for searching jobs, contracts, subcontracts, resume generation, and commercial proposals.",
         "sidebar_auth": "🔑 Identification",
         "email_label": "Your Email",
         "email_help": "Unique key for your profile in the system.",
@@ -93,7 +93,7 @@ TRANSLATIONS = {
     "es": {
         "page_title": "Global Job Hub | SaaS",
         "app_title": "🌍 Global Job Hub",
-        "app_caption": "Plataforma autónoma para la búsqueda global de empleo, generación de CV y notificaciones inteligentes.",
+        "app_caption": "Plataforma autónoma para la búsqueda de empleo, contratos, subcontratos, generación de CV y propuestas comerciales.",
         "sidebar_auth": "🔑 Identificación",
         "email_label": "Tu Correo Electrónico",
         "email_help": "Clave única para tu perfil en el sistema.",
@@ -133,7 +133,7 @@ TRANSLATIONS = {
     "fr": {
         "page_title": "Global Job Hub | SaaS",
         "app_title": "🌍 Global Job Hub",
-        "app_caption": "Plateforme autonome pour la recherche mondiale d'emploi, la génération de CV et les notifications intelligentes.",
+        "app_caption": "Plateforme autonome de recherche d'emplois, contrats, sous-traitances, génération de CV et propositions commerciales.",
         "sidebar_auth": "🔑 Identification",
         "email_label": "Votre e-mail",
         "email_help": "Clé unique de votre profil dans le système.",
@@ -173,7 +173,7 @@ TRANSLATIONS = {
     "de": {
         "page_title": "Global Job Hub | SaaS",
         "app_title": "🌍 Global Job Hub",
-        "app_caption": "Autonome Plattform für die globale Jobsuche, Lebenslauf-Generierung und intelligente Benachrichtigungen.",
+        "app_caption": "Autonome Plattform für die Suche nach Jobs, Aufträgen, Subaufträgen, Lebenslauferstellung und kommerziellen Angeboten.",
         "sidebar_auth": "🔑 Identifikation",
         "email_label": "Ihre E-Mail-Adresse",
         "email_help": "Eindeutiger Schlüssel für Ihr Profil im System.",
@@ -213,7 +213,7 @@ TRANSLATIONS = {
     "pt": {
         "page_title": "Global Job Hub | SaaS",
         "app_title": "🌍 Global Job Hub",
-        "app_caption": "Plataforma autônoma para busca global de empregos, geração de currículos e notificações inteligentes.",
+        "app_caption": "Plataforma autônoma para busca de empregos, contratos, subcontratos, geração de currículos e propostas comerciais.",
         "sidebar_auth": "🔑 Identificação",
         "email_label": "Seu E-mail",
         "email_help": "Chave exclusiva para o seu perfil no sistema.",
@@ -253,7 +253,7 @@ TRANSLATIONS = {
     "ru": {
         "page_title": "Global Job Hub | SaaS",
         "app_title": "🌍 Global Job Hub",
-        "app_caption": "Автономная платформа глобального поиска вакансий, генерации резюме и умных уведомлений.",
+        "app_caption": "Автономная платформа поиска вакансий, подрядов и субподрядов, генерации резюме и коммерческих предложений.",
         "sidebar_auth": "🔑 Идентификация",
         "email_label": "Ваш Email",
         "email_help": "Уникальный ключ вашего профиля в системе.",
