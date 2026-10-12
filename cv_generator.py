@@ -27,7 +27,7 @@ def generate_pdf_cv(profile, email, pdf_filename):
     )
     meta_style = ParagraphStyle(
         'CVMeta', parent=styles['Normal'], 
-        fontSize=9.5, leading=13, textColor=colors.HexColor("#475569"), spaceAfter=10
+        fontSize=9.5, leading=13, textColor=colors.HexColor("#475569"), spaceAfter=6
     )
     heading_style = ParagraphStyle(
         'CVHeading', parent=styles['Heading2'], 
@@ -39,18 +39,18 @@ def generate_pdf_cv(profile, email, pdf_filename):
         fontSize=10, leading=14.5, textColor=colors.HexColor("#0f172a"), spaceAfter=6
     )
 
-    # 1. Шапка: Ім'я, Посади, Контакти
+    # 1. Шапка: Ім'я, Посади
     story.append(Paragraph(profile.get("name", "Candidate CV"), title_style))
     
     titles = profile.get("job_titles", "")
     if titles:
         story.append(Paragraph(f"<b>Target Roles:</b> {titles}", subtitle_style))
         
-    # Контакти (Телефон, Email, Адреса)
+    # Блок КОНТАКТИ у шапці (Телефон, Email, Адреса)
     contacts = []
     phone = profile.get("phone", "")
     if phone:
-        contacts.append(f"<b>Phone:</b> {phone}")
+        contacts.append(f"<b>Tel:</b> {phone}")
     if email:
         contacts.append(f"<b>Email:</b> {email}")
     address = profile.get("address", "")
@@ -58,9 +58,9 @@ def generate_pdf_cv(profile, email, pdf_filename):
         contacts.append(f"<b>Address:</b> {address}")
         
     if contacts:
-        story.append(Paragraph(" | ".join(contacts), meta_style))
+        story.append(Paragraph("<b>Контакти:</b> " + " | ".join(contacts), meta_style))
         
-    # Логістика / Мови (Другий рядок шапки)
+    # Логістика / Регіони / Мови
     logistics = []
     locs = profile.get("locations", "")
     if locs:
@@ -102,7 +102,7 @@ def generate_pdf_cv(profile, email, pdf_filename):
         story.append(Paragraph(certs.replace("\n", "<br/>"), body_style))
         story.append(Spacer(1, 4))
 
-    # 6. Інші дані (Права, авто, переїзд тощо)
+    # 6. Інші дані (Дозвіл на роботу, права, авто, переїзд тощо)
     other = profile.get("other_data", "")
     if other:
         story.append(Paragraph("Other Data & Availability", heading_style))
