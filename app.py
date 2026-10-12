@@ -376,13 +376,13 @@ with st.sidebar:
         "Виберіть мову",
         options=["uk", "en", "es", "fr", "de", "pt", "ru"],
         format_func=lambda x: {
-            "uk": "🇺🇦 Українська",
             "en": "🇬🇧 English",
             "es": "🇪🇸 Español",
             "fr": "🇫🇷 Français",
             "de": "🇩🇪 Deutsch",
             "pt": "🇵🇹 Português",
             "ru": "🇷🇺 Русский"
+            "uk": "🇺🇦 Українська",
         }[x],
         label_visibility="collapsed"
     )
