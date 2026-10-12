@@ -371,7 +371,7 @@ st.set_page_config(
 
 # Вибір мови у сайдбарі (Українська остання)
 with st.sidebar:
-    st.markdown("### 🌐 Language / Idioma / Мова / Язык")
+    st.markdown("### 🌐 Language / Idioma / Язык")
     selected_lang = st.selectbox(
         "Виберіть мову",
         options=["en", "es", "fr", "de", "pt", "ru", "uk"],
