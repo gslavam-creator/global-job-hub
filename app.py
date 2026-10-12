@@ -369,12 +369,12 @@ st.set_page_config(
     layout="wide"
 )
 
-# Вибір мови у сайдбарі
+# Вибір мови у сайдбарі (Українська остання)
 with st.sidebar:
     st.markdown("### 🌐 Language / Мова / Idioma")
     selected_lang = st.selectbox(
         "Виберіть мову",
-        options=["uk", "en", "es", "fr", "de", "pt", "ru"],
+        options=["en", "es", "fr", "de", "pt", "ru", "uk"],
         format_func=lambda x: {
             "en": "🇬🇧 English",
             "es": "🇪🇸 Español",
@@ -389,7 +389,7 @@ with st.sidebar:
     st.session_state["lang"] = selected_lang
 
 # Отримуємо переклади для поточної мови
-lang = st.session_state.get("lang", "uk")
+lang = st.session_state.get("lang", "en")
 t = TRANSLATIONS[lang]
 
 # Шапка додатка
